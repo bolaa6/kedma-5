@@ -1,0 +1,1059 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>يومي مع ربنا</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@500;700&family=Tajawal:wght@400;500;700&display=swap">
+<style>
+  /* Layout: one centered column. Kids register once, then tick prayer / Gospel / weekly Mass to earn stars, and read the teachers' notes. Teachers get a "المتابعة" tab: table of all kids by day, meeting attendance, stars, and a details + behavior-notes panel per kid. */
+  :root {
+    --bg: #f4f9ff;
+    --surface: #ffffff;
+    --ink: #1b2a4a;
+    --muted: #5b6b8c;
+    --line: #d6e4fb;
+    --accent: #2563eb;
+    --gold: #f0a30a;
+    --gold-ink: #a86a00;
+    --done: #17a05d;
+    --done-bg: #e6f9ef;
+    --done-ink: #0c6b3d;
+    --track: #e1ecfd;
+    --bad: #d92d20;
+    --font-display: "Reem Kufi", "Tajawal", "Segoe UI", Tahoma, sans-serif;
+    --font-body: "Tajawal", "Segoe UI", Tahoma, sans-serif;
+  }
+  /* Light by default. Night mode is the page's own switch (body.night), not the device setting. */
+  body.night {
+    --bg: #0f1830; --surface: #182548; --ink: #eaf0ff; --muted: #a4b3d6; --line: #2f4170;
+    --accent: #7fa8ff; --gold: #ffc94d; --gold-ink: #ffc94d; --done: #3ecf8e; --done-bg: #123c2e; --done-ink: #c3f3dc; --track: #263a68; --bad: #ff8f85;
+    color-scheme: dark;
+  }
+
+  html { color-scheme: light; }
+  [hidden] { display: none !important; }
+  img { max-width: 100%; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 17px;
+    line-height: 1.6;
+    direction: rtl;
+    padding-block: 24px 40px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .wrap { max-width: 920px; margin-inline: auto; display: flex; flex-direction: column; gap: 20px; }
+  .kid { max-width: 680px; width: 100%; margin-inline: auto; display: flex; flex-direction: column; gap: 20px; }
+  #teacher { display: flex; flex-direction: column; gap: 20px; }
+  button, input, textarea { font-family: inherit; }
+  button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  header { display: flex; align-items: center; gap: 14px; }
+  .cross { flex: none; width: 46px; height: 46px; color: var(--gold); }
+  h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(2rem, 8vw, 2.6rem); line-height: 1.15; margin: 0; text-wrap: balance; }
+  .sub { margin: 2px 0 0; color: var(--muted); font-size: 0.95rem; }
+  .modebtn { margin-inline-start: auto; flex: none; width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--line); background: var(--surface); color: var(--ink); display: grid; place-items: center; cursor: pointer; }
+
+  .tabs { display: flex; gap: 8px; }
+  .tab { flex: 1 1 0; min-height: 48px; border-radius: 12px; border: 2px solid var(--line); background: var(--surface); color: var(--ink); font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; cursor: pointer; }
+  .tab[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+
+  .notice { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; background: var(--surface); color: var(--ink); font-size: 0.95rem; }
+  .notice.bad { border-color: var(--bad); color: var(--bad); }
+
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 16px; }
+  h2 { font-family: var(--font-display); font-weight: 700; font-size: 1.35rem; margin: 0; }
+  .note { margin: 0; color: var(--muted); font-size: 0.95rem; }
+
+  .hello { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
+  .link { background: none; border: none; color: var(--accent); font-size: 0.9rem; font-weight: 500; cursor: pointer; text-decoration: underline; padding: 6px 0; min-height: 36px; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .btn { min-height: 52px; padding: 0 22px; border-radius: 12px; border: 2px solid var(--accent); background: var(--accent); color: var(--bg); font-weight: 700; font-size: 1.05rem; cursor: pointer; }
+  .btn.ghost { background: transparent; color: var(--accent); }
+
+  .starline { display: flex; align-items: baseline; gap: 8px; }
+  .starline .gem { font-size: 1.6rem; }
+  .starnum { font-family: var(--font-display); font-weight: 700; font-size: 2rem; line-height: 1; font-variant-numeric: tabular-nums; }
+  .gem { color: var(--gold-ink); }
+  .wkstars { margin: 0; color: var(--muted); font-size: 0.9rem; }
+  .wkstars b { color: var(--ink); font-family: var(--font-display); font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+
+  /* Registration form */
+  .form { display: flex; flex-direction: column; gap: 16px; }
+  .grp { font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; color: var(--accent); margin: 6px 0 -4px; padding-top: 12px; border-top: 1px solid var(--line); }
+  .grp.first { border-top: none; padding-top: 0; margin-top: 0; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+  .field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .field.wide { grid-column: 1 / -1; }
+  .field label, legend { font-weight: 700; font-size: 0.95rem; }
+  .hint { color: var(--muted); font-size: 0.85rem; font-weight: 400; }
+  input[type="text"], input[type="tel"], input[type="email"], input[type="password"], textarea {
+    width: 100%; min-width: 0; min-height: 52px; padding: 0 14px; border-radius: 12px;
+    border: 2px solid var(--line); background: var(--bg); color: var(--ink); font-size: 1.05rem;
+  }
+  input[type="tel"], input[type="email"], input[type="password"] { direction: ltr; text-align: right; }
+  textarea { min-height: 104px; padding: 10px 14px; resize: vertical; line-height: 1.6; }
+  fieldset { border: none; padding: 0; margin: 0; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+  .radios { display: flex; gap: 10px; flex-wrap: wrap; }
+  .radio { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 18px; border: 2px solid var(--line); border-radius: 12px; background: var(--surface); font-weight: 700; cursor: pointer; flex: 1 1 120px; }
+  .radio input { width: 20px; height: 20px; accent-color: var(--accent); margin: 0; }
+  .radio:has(input:checked) { border-color: var(--accent); background: var(--done-bg); color: var(--done-ink); }
+  .sib { border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+  .sib-top { display: flex; justify-content: space-between; align-items: center; }
+  .formerr { color: var(--bad); font-weight: 700; margin: 0; }
+
+  .weekbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+  .range { font-family: var(--font-display); font-weight: 500; font-size: 1.05rem; color: var(--accent); }
+  .navbtns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .nav { min-height: 40px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--line); background: transparent; color: var(--ink); font-size: 0.9rem; font-weight: 500; cursor: pointer; }
+  .nav:disabled { opacity: 0.4; cursor: default; }
+
+  .progress { display: flex; flex-direction: column; gap: 8px; }
+  .progress-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .count { font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+  .msg { color: var(--muted); font-size: 0.95rem; }
+  .bar { height: 12px; border-radius: 99px; background: var(--track); overflow: hidden; }
+  .bar > span { display: block; height: 100%; width: 0; background: var(--done); border-radius: 99px; transition: width 0.4s ease; }
+  .bar.full > span { background: var(--gold); }
+
+  .days { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .day { border: 1px solid var(--line); border-radius: 14px; padding: 12px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 14px; }
+  .day.today { border: 2px solid var(--accent); padding: 11px; }
+  .day.future { opacity: 0.55; }
+  .day-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; flex: 1 1 130px; }
+  .day-name { font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; }
+  .day-date { color: var(--muted); font-size: 0.9rem; }
+  .badge { background: var(--accent); color: var(--bg); font-size: 0.78rem; font-weight: 700; border-radius: 99px; padding: 1px 10px; }
+  .badge.full { background: var(--done); color: var(--surface); }
+  .ticks { display: flex; gap: 8px; flex-wrap: wrap; flex: 1 1 280px; }
+
+  .tick {
+    display: flex; align-items: center; justify-content: flex-start; gap: 10px;
+    min-height: 52px; flex: 1 1 130px; padding: 0 14px;
+    border: 2px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink);
+    font-size: 1rem; font-weight: 700; cursor: pointer; text-align: start;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .tick:disabled { cursor: default; }
+  .tick.status { cursor: default; }
+  .tick .box { flex: none; width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; color: transparent; }
+  .tick .box svg { width: 16px; height: 16px; }
+  .tick[aria-pressed="true"], .tick.on { background: var(--done-bg); border-color: var(--done); color: var(--done-ink); }
+  .tick[aria-pressed="true"] .box, .tick.on .box { background: var(--done); border-color: var(--done); color: var(--surface); }
+  .tick .gain { margin-inline-start: auto; color: var(--gold-ink); font-size: 1.2rem; line-height: 1; opacity: 0.28; }
+  .tick[aria-pressed="true"] .gain, .tick.on .gain { opacity: 1; }
+  .tick.pop .box { animation: pop 0.3s ease; }
+  @keyframes pop { 0% { transform: scale(0.7); } 60% { transform: scale(1.18); } 100% { transform: scale(1); } }
+
+  .weekly { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--line); padding-top: 14px; }
+  .weekly h3 { font-family: var(--font-display); font-size: 1.05rem; margin: 0; color: var(--accent); }
+
+  .tick.big { min-height: 64px; font-size: 1.15rem; flex: none; width: 100%; }
+  .tick.big .box { width: 34px; height: 34px; }
+  .tick.big .box svg { width: 19px; height: 19px; }
+  .chips { display: grid; grid-template-columns: repeat(auto-fit, minmax(72px, 1fr)); gap: 8px; }
+  .chip { min-height: 44px; border-radius: 10px; border: 1px solid var(--line); background: transparent; color: var(--muted); font-size: 0.9rem; font-weight: 500; cursor: pointer; }
+  .chip:disabled { opacity: 0.4; cursor: default; }
+  .chip[aria-pressed="true"] { background: var(--done-bg); border-color: var(--done); color: var(--done-ink); font-weight: 700; }
+
+  /* Notes (read by kids, written by teachers) */
+  .notelist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .notelist li { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+  .nd { color: var(--muted); font-size: 0.8rem; }
+  .nt { flex: 1 1 200px; min-width: 0; overflow-wrap: anywhere; white-space: pre-wrap; font-weight: 500; }
+  .ns { color: var(--bad); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .ns.zero { color: var(--muted); font-weight: 500; }
+  .stepper { display: flex; align-items: center; gap: 10px; }
+  .stepper .nav { min-width: 44px; min-height: 44px; font-size: 1.2rem; padding: 0; }
+  .stepper output { min-width: 28px; text-align: center; font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; font-variant-numeric: tabular-nums; }
+
+  /* Teacher table */
+  .stats { display: flex; flex-wrap: wrap; gap: 8px 18px; color: var(--muted); font-size: 0.95rem; }
+  .stats b { color: var(--ink); font-family: var(--font-display); font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+  .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+  table { border-collapse: collapse; width: 100%; min-width: 960px; font-size: 0.88rem; }
+  th, td { padding: 8px 6px; text-align: center; border-bottom: 1px solid var(--line); background: var(--surface); white-space: nowrap; }
+  tbody tr:last-child td { border-bottom: none; }
+  th { font-weight: 700; color: var(--muted); font-size: 0.82rem; }
+  th.today { color: var(--accent); }
+  th small { display: block; font-weight: 400; font-variant-numeric: tabular-nums; }
+  th.name, td.name { position: sticky; inset-inline-start: 0; z-index: 1; text-align: start; min-width: 130px; border-inline-end: 1px solid var(--line); }
+  td.name { white-space: normal; }
+  .namebtn { background: none; border: none; padding: 4px 0; min-height: 32px; color: var(--ink); font-size: 0.95rem; font-weight: 700; text-align: start; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 4px; }
+  .namebtn[aria-expanded="true"] { color: var(--accent); }
+  .joined { display: block; font-weight: 400; color: var(--muted); font-size: 0.75rem; }
+  .m { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--line); font-size: 0.75rem; font-weight: 700; color: var(--muted); margin-inline: 2px; }
+  .m.on { background: var(--done); border-color: var(--done); color: var(--surface); }
+  td.future .m { opacity: 0.35; }
+  td.total { font-family: var(--font-display); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .pill, .pillbtn { display: inline-block; border-radius: 99px; padding: 1px 12px; font-size: 0.8rem; font-weight: 700; border: 1px solid var(--line); color: var(--muted); background: transparent; }
+  .pillbtn { min-height: 34px; padding: 0 14px; cursor: pointer; }
+  .pill.on, .pillbtn.on { background: var(--done-bg); border-color: var(--done); color: var(--done-ink); }
+  .last { display: block; color: var(--muted); font-size: 0.72rem; }
+  .mini { background: none; border: none; color: var(--bad); font-size: 0.78rem; font-weight: 500; cursor: pointer; text-decoration: underline; padding: 4px 0; min-height: 32px; }
+  .mini.plain { color: var(--muted); }
+  .legend { margin: 0; color: var(--muted); font-size: 0.85rem; }
+  .empty { text-align: center; padding: 28px 12px; color: var(--muted); display: flex; flex-direction: column; gap: 6px; }
+  .empty b { color: var(--ink); font-family: var(--font-display); font-size: 1.2rem; }
+
+  .info { border: 2px solid var(--accent); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+  .info-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .info h3 { font-family: var(--font-display); font-size: 1.2rem; margin: 0; }
+  dl.facts { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px 18px; }
+  dl.facts div { min-width: 0; }
+  dl.facts .wide { grid-column: 1 / -1; }
+  dt { color: var(--muted); font-size: 0.82rem; font-weight: 500; }
+  dd { margin: 0; font-weight: 700; overflow-wrap: anywhere; white-space: pre-wrap; }
+  dd.ltr { direction: ltr; text-align: right; }
+  dd ul { margin: 0; padding-inline-start: 20px; font-weight: 500; white-space: normal; }
+  .noteform { display: flex; flex-direction: column; gap: 12px; }
+
+  .verse { text-align: center; color: var(--muted); font-size: 0.95rem; margin: 0; }
+  .verse b { color: var(--ink); font-family: var(--font-display); font-weight: 500; font-size: 1.1rem; display: block; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tick.pop .box { animation: none; }
+    .bar > span { transition: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap" dir="rtl" lang="ar">
+  <header>
+    <svg class="cross" viewBox="0 0 48 48" aria-hidden="true">
+      <path fill="currentColor" d="M20 4h8v14h14v8H28v14h-8V26H6v-8h14z"/>
+      <circle cx="24" cy="22" r="3.2" fill="var(--bg)"/>
+    </svg>
+    <div>
+      <h1>يومي مع ربنا</h1>
+      <p class="sub">سنة خامسة ابتدائي · صلاة وإنجيل وقداس، ونجوم كل أسبوع</p>
+    </div>
+    <button class="modebtn" id="modeBtn" type="button" aria-pressed="false" aria-label="الوضع الليلي" title="الوضع الليلي"></button>
+    <button class="link" id="outBtn" type="button" hidden>خروج</button>
+  </header>
+
+  <div class="tabs" id="tabs" hidden></div>
+  <div id="notes" aria-live="polite"></div>
+  <div class="kid" id="kid"></div>
+  <div id="teacher" hidden></div>
+  <p class="verse" id="verse"></p>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+  import { getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+  /* ===== املا البيانات دي من Firebase Console قبل الرفع ===== */
+  /* Project settings > General > Your apps > Web app > Config */
+  var OWNER_EMAIL = "PUT_YOUR_EMAIL@gmail.com";   // إيميلك إنت
+  var firebaseConfig = {
+    apiKey: "PUT_API_KEY",
+    authDomain: "PUT_PROJECT_ID.firebaseapp.com",
+    projectId: "PUT_PROJECT_ID",
+    storageBucket: "PUT_PROJECT_ID.firebasestorage.app",
+    messagingSenderId: "PUT_SENDER_ID",
+    appId: "PUT_APP_ID"
+  };
+  /* ======================================================== */
+
+  var MONTHS = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+  var DAYS = ["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
+  var VERSES = [
+    ["صلّوا بلا انقطاع", "١ تسالونيكي ٥: ١٧"],
+    ["سراج لرجلي كلامك ونور لسبيلي", "مزمور ١١٩: ١٠٥"],
+    ["اطلبوا أولاً ملكوت الله وبرّه", "متى ٦: ٣٣"]
+  ];
+  var CHECK = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var MAX_TICKS = 15; // 7 days x (prayer + Gospel) + Mass
+
+  function $(id) { return document.getElementById(id); }
+  function pad(n) { return String(n).padStart(2, "0"); }
+  function dkey(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  function ar(n) { return n.toLocaleString("ar-EG", { useGrouping: false }); }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function digits(s) {
+    return String(s == null ? "" : s)
+      .replace(/[٠-٩]/g, function (c) { return String(c.charCodeAt(0) - 1632); })
+      .replace(/[۰-۹]/g, function (c) { return String(c.charCodeAt(0) - 1776); });
+  }
+  function normPhone(s) { return digits(s).replace(/[\s\-().]/g, ""); }
+  function phoneOk(s) { return /^\+?\d{8,15}$/.test(s); }
+  function cleanName(v) { return String(v || "").replace(/\s+/g, " ").trim(); }
+  function niceDate(k) {
+    var p = String(k || "").split("-");
+    if (p.length !== 3) return "";
+    return ar(Number(p[2])) + " " + MONTHS[Number(p[1]) - 1];
+  }
+
+  var today = new Date(); today.setHours(0, 0, 0, 0);
+  var todayKey = dkey(today);
+  var curMonthKey = today.getFullYear() + "-" + pad(today.getMonth() + 1);
+
+  var S = {
+    status: "loading",   // loading | setup | out | ok
+    db: null, uid: null, user: null, canEdit: false, isOwner: false, canWrite: null, writeFail: false,
+    login: { mode: "in", email: "", pass: "", err: "", busy: false }, teachers: [], tErr: "", unsub: [],
+    meLoaded: false, me: null, aw: null,
+    recs: [], recsLoaded: false, awards: {}, awardsLoaded: false, awExists: {},
+    tab: "kid", kidWeek: 0, teachWeek: 0, confirmDel: null, confirmVoid: null, sel: null,
+    nd: { text: "", stars: 1 }, noteErr: "",
+    draft: null, editProfile: false, formErr: "",
+    err: "", net: false, pop: null, chain: Promise.resolve()
+  };
+
+  function weekDays(offset) {
+    var start = new Date(today);
+    start.setDate(today.getDate() - ((today.getDay() + 1) % 7) + offset * 7);
+    var out = [];
+    for (var i = 0; i < 7; i++) { var d = new Date(start); d.setDate(start.getDate() + i); out.push(d); }
+    return out;
+  }
+  function rangeLabel(ds) {
+    var a = ds[0], b = ds[6];
+    return ar(a.getDate()) + " " + MONTHS[a.getMonth()] + " – " + ar(b.getDate()) + " " + MONTHS[b.getMonth()];
+  }
+  function navButtons(who, offset, limit) {
+    return '<div class="navbtns">' +
+      '<button class="nav" type="button" data-nav="' + who + ':-1"' + (offset <= limit ? " disabled" : "") + '>الأسبوع اللي فات</button>' +
+      '<button class="nav" type="button" data-nav="' + who + ':1"' + (offset >= 0 ? " disabled" : "") + '>الأسبوع الجاي</button></div>';
+  }
+
+  /* Stars: +1 for each prayer, Gospel reading, weekly Mass and meeting; minus the deductions in teachers' notes. */
+  function calcStars(rec, aw, ds) {
+    rec = rec || {}; aw = aw || {};
+    var all = { p: 0, b: 0, mass: 0, meet: 0, cut: 0 }, wk = { p: 0, b: 0, mass: 0, meet: 0, cut: 0 };
+    var inWeek = {}, wkKey = ds ? dkey(ds[0]) : null;
+    if (ds) ds.forEach(function (d) { inWeek[dkey(d)] = true; });
+    var days = rec.days || {};
+    Object.keys(days).forEach(function (k) {
+      var r = days[k] || {};
+      if (r.p) { all.p++; if (inWeek[k]) wk.p++; }
+      if (r.b) { all.b++; if (inWeek[k]) wk.b++; }
+    });
+    var masses = rec.masses || {};
+    Object.keys(masses).forEach(function (k) { if (masses[k]) { all.mass++; if (k === wkKey) wk.mass++; } });
+    var meets = aw.meetings || {};
+    Object.keys(meets).forEach(function (k) { if (meets[k]) { all.meet++; if (k === wkKey) wk.meet++; } });
+    var notes = aw.notes || {};
+    Object.keys(notes).forEach(function (id) {
+      var n = notes[id];
+      if (!n || n.void) return;
+      var c = Number(n.stars) || 0;
+      all.cut += c;
+      if (inWeek[n.date]) wk.cut += c;
+    });
+    function sum(o) { return o.p + o.b + o.mass + o.meet - o.cut; }
+    return { all: all, week: wk, total: Math.max(0, sum(all)), weekTotal: Math.max(0, sum(wk)) };
+  }
+  function weekTicks(rec, ds) {
+    var days = (rec && rec.days) || {}, t = 0;
+    ds.forEach(function (d) { var r = days[dkey(d)]; if (r) { if (r.p) t++; if (r.b) t++; } });
+    if (rec && rec.masses && rec.masses[dkey(ds[0])]) t++;
+    return t;
+  }
+  function breakdown(w) {
+    var s = "صلاة " + ar(w.p) + " · إنجيل " + ar(w.b) + " · قداس " + ar(w.mass) + " · اجتماع " + ar(w.meet);
+    if (w.cut) s += " · خصم −" + ar(w.cut);
+    return s;
+  }
+
+  /* ---------- registration form ---------- */
+  function blankSib() { return { name: "", age: "", grade: "" }; }
+  /* After registering, a kid can edit and add but not remove what was saved. */
+  function savedSibCount() { return S.me && S.me.profileAt && S.me.hasSiblings ? (S.me.siblings || []).length : 0; }
+  function lockedNoSib() { return !!(S.me && S.me.profileAt && S.me.hasSiblings); }
+  function makeDraft(me) {
+    me = me || {};
+    var sibs = (me.siblings || []).map(function (s) { return { name: s.name || "", age: s.age == null ? "" : String(s.age), grade: s.grade || "" }; });
+    return {
+      name: me.name || "", phone: me.phone || "", momPhone: me.momPhone || "", dadPhone: me.dadPhone || "",
+      address: me.address || "", confessor: me.confessor || "", school: me.school || "",
+      hasSib: me.profileAt ? (me.hasSiblings ? "yes" : "no") : "",
+      sibs: sibs.length ? sibs : (me.hasSiblings ? [blankSib()] : [])
+    };
+  }
+
+  function textField(id, f, label, val, extra) {
+    extra = extra || {};
+    return '<div class="field' + (extra.wide ? " wide" : "") + '"><label for="' + id + '">' + label + '</label>' +
+      '<input type="' + (extra.tel ? "tel" : "text") + '" id="' + id + '" data-f="' + f + '" value="' + esc(val) + '" maxlength="' + (extra.max || 60) + '" autocomplete="off"' +
+      (extra.tel ? ' inputmode="tel"' : "") + (extra.ph ? ' placeholder="' + esc(extra.ph) + '"' : "") + '></div>';
+  }
+
+  function formHTML() {
+    var d = S.draft, first = !S.me;
+    var sib = "";
+    if (d.hasSib === "yes") {
+      d.sibs.forEach(function (s, i) {
+        sib += '<div class="sib"><div class="sib-top"><b>أخ / أخت ' + ar(i + 1) + '</b>' +
+          (d.sibs.length > 1 && i >= savedSibCount() ? '<button class="mini plain" type="button" data-sibdel="' + i + '">شيل</button>' : "") + '</div>' +
+          '<div class="grid2">' +
+          '<div class="field"><label for="sib-' + i + '-name">الاسم</label><input type="text" id="sib-' + i + '-name" data-s="' + i + ':name" value="' + esc(s.name) + '" maxlength="40" autocomplete="off"></div>' +
+          '<div class="field"><label for="sib-' + i + '-age">السن</label><input type="text" inputmode="numeric" id="sib-' + i + '-age" data-s="' + i + ':age" value="' + esc(s.age) + '" maxlength="2" autocomplete="off"></div>' +
+          '<div class="field wide"><label for="sib-' + i + '-grade">في سنة كام؟</label><input type="text" id="sib-' + i + '-grade" data-s="' + i + ':grade" value="' + esc(s.grade) + '" maxlength="40" autocomplete="off" placeholder="مثلاً: تالتة إعدادي"></div>' +
+          '</div></div>';
+      });
+      if (d.sibs.length < 8) sib += '<button class="btn ghost" type="button" data-sibadd="1">أضيف أخ أو أخت</button>';
+    }
+
+    return '<form id="profileForm" class="card form" novalidate>' +
+      '<h2>' + (first ? "سجّل حسابك" : S.editProfile ? "بياناتي" : "كمّل بياناتك") + '</h2>' +
+      '<p class="note">البيانات دي بيشوفها المدرس بس.' + (S.me && S.me.profileAt ? " تقدر تعدّلها لكن مش تمسحها." : "") + '</p>' +
+      '<h3 class="grp first">عنك</h3>' +
+      '<div class="grid2">' + textField("f-name", "name", "اسمك بالكامل", d.name, { wide: true, max: 50 }) +
+      textField("f-phone", "phone", 'رقم تليفونك <span class="hint">(لو عندك)</span>', d.phone, { tel: true, max: 20, wide: true }) + '</div>' +
+      '<h3 class="grp">تليفونات الأهل</h3>' +
+      '<div class="grid2">' + textField("f-mom", "momPhone", "رقم ماما", d.momPhone, { tel: true, max: 20 }) +
+      textField("f-dad", "dadPhone", "رقم بابا", d.dadPhone, { tel: true, max: 20 }) + '</div>' +
+      '<span class="hint">اكتب رقم واحد على الأقل منهم.</span>' +
+      '<h3 class="grp">العنوان</h3>' +
+      '<div class="field"><label for="f-address">العنوان بالتفصيل</label>' +
+      '<textarea id="f-address" data-f="address" maxlength="300" placeholder="المنطقة، الشارع، رقم العمارة، الدور، الشقة، وأي علامة مميزة">' + esc(d.address) + '</textarea></div>' +
+      '<h3 class="grp">الكنيسة والمدرسة</h3>' +
+      '<div class="grid2">' + textField("f-conf", "confessor", "أب الاعتراف", d.confessor, { max: 60 }) +
+      textField("f-school", "school", "المدرسة", d.school, { max: 60 }) + '</div>' +
+      '<h3 class="grp">الإخوات</h3>' +
+      '<fieldset><legend>عندك إخوات؟</legend><div class="radios">' +
+      '<label class="radio" for="hs-yes"><input type="radio" name="hasSib" id="hs-yes" value="yes" data-f="hasSib"' + (d.hasSib === "yes" ? " checked" : "") + '>أيوه</label>' +
+      '<label class="radio" for="hs-no"><input type="radio" name="hasSib" id="hs-no" value="no" data-f="hasSib"' + (d.hasSib === "no" ? " checked" : "") + (lockedNoSib() ? " disabled" : "") + '>لأ</label>' +
+      '</div>' + sib + '</fieldset>' +
+      (S.formErr ? '<p class="formerr" role="alert">' + esc(S.formErr) + '</p>' : "") +
+      '<div class="row"><button class="btn" type="submit">' + (first ? "سجّلني" : "حفظ") + '</button>' +
+      (S.editProfile ? '<button class="btn ghost" type="button" data-cancelprofile="1">إلغاء</button>' : "") + '</div></form>';
+  }
+
+  function validateDraft(d) {
+    var name = cleanName(d.name);
+    if (name.length < 2) return { error: "اكتب اسمك بالكامل." };
+    var phone = normPhone(d.phone), mom = normPhone(d.momPhone), dad = normPhone(d.dadPhone);
+    if (phone && !phoneOk(phone)) return { error: "رقم تليفونك مش مظبوط. اكتب أرقام بس." };
+    if (mom && !phoneOk(mom)) return { error: "رقم ماما مش مظبوط. اكتب أرقام بس." };
+    if (dad && !phoneOk(dad)) return { error: "رقم بابا مش مظبوط. اكتب أرقام بس." };
+    if (!mom && !dad) return { error: "اكتب رقم ماما أو رقم بابا على الأقل." };
+    var sv = S.me && S.me.profileAt ? S.me : null;
+    if (sv && ((sv.phone && !phone) || (sv.momPhone && !mom) || (sv.dadPhone && !dad))) return { error: "ما ينفعش تمسح رقم اتسجّل. عدّله بس." };
+    var address = String(d.address || "").replace(/[ \t]+/g, " ").trim();
+    if (address.length < 8) return { error: "اكتب العنوان بالتفصيل." };
+    var confessor = cleanName(d.confessor);
+    if (confessor.length < 2) return { error: "اكتب اسم أب الاعتراف." };
+    var school = cleanName(d.school);
+    if (school.length < 2) return { error: "اكتب اسم المدرسة." };
+    if (d.hasSib !== "yes" && d.hasSib !== "no") return { error: "اختار: عندك إخوات ولا لأ؟" };
+    var sibs = [];
+    if (d.hasSib === "yes") {
+      for (var i = 0; i < d.sibs.length; i++) {
+        var s = d.sibs[i], sn = cleanName(s.name), age = Number(digits(s.age).trim()), sg = cleanName(s.grade);
+        if (sn.length < 2 || !digits(s.age).trim() || isNaN(age) || age < 0 || age > 60 || sg.length < 2) {
+          return { error: "كمّل بيانات الإخوات: الاسم والسن والسنة الدراسية لكل واحد." };
+        }
+        sibs.push({ name: sn, age: Math.round(age), grade: sg });
+      }
+    }
+    if (sv && sv.hasSiblings && (d.hasSib !== "yes" || sibs.length < (sv.siblings || []).length)) return { error: "ما ينفعش تمسح الإخوات اللي اتسجّلوا. عدّلهم بس." };
+    return { data: {
+      name: name, phone: phone, momPhone: mom, dadPhone: dad, address: address, confessor: confessor, school: school,
+      hasSiblings: d.hasSib === "yes", siblings: sibs, profileAt: new Date().toISOString()
+    } };
+  }
+
+  /* ---------- kid view ---------- */
+  function noticeHTML(text, bad) { return '<div class="notice' + (bad ? " bad" : "") + '">' + text + '</div>'; }
+
+  function activeNotes(aw) {
+    var notes = (aw && aw.notes) || {}, out = [];
+    Object.keys(notes).forEach(function (id) {
+      var n = notes[id];
+      if (n && !n.void) out.push({ id: id, n: n });
+    });
+    out.sort(function (a, b) { return String(b.n.at || "").localeCompare(String(a.n.at || "")); });
+    return out;
+  }
+
+  function trackerHTML() {
+    var days = S.me.days || {}, months = S.me.months || {}, masses = S.me.masses || {};
+    var ds = weekDays(S.kidWeek), wk = dkey(ds[0]), rows = "";
+    var ticks = weekTicks(S.me, ds);
+    var st = calcStars(S.me, S.aw, ds);
+    ds.forEach(function (d) {
+      var k = dkey(d), r = days[k] || {};
+      var isToday = k === todayKey, future = k > todayKey;
+      rows += '<li class="day' + (isToday ? " today" : "") + (future ? " future" : "") + '">' +
+        '<div class="day-head"><span class="day-name">' + DAYS[d.getDay()] + '</span>' +
+        '<span class="day-date">' + ar(d.getDate()) + " " + MONTHS[d.getMonth()] + '</span>' +
+        (isToday ? '<span class="badge">النهارده</span>' : "") +
+        (r.p && r.b ? '<span class="badge full">يوم كامل</span>' : "") + '</div>' +
+        '<div class="ticks">' +
+        '<button class="tick" type="button" data-k="' + k + '" data-t="p" aria-pressed="' + !!r.p + '"' + (future ? " disabled" : "") + '><span class="box">' + CHECK + '</span>صلّيت<span class="gain" aria-hidden="true">★</span></button>' +
+        '<button class="tick" type="button" data-k="' + k + '" data-t="b" aria-pressed="' + !!r.b + '"' + (future ? " disabled" : "") + '><span class="box">' + CHECK + '</span>قرأت الإنجيل<span class="gain" aria-hidden="true">★</span></button>' +
+        '</div></li>';
+    });
+    var msg = ticks === MAX_TICKS ? "ما شاء الله، أسبوع كامل! ربنا يباركك"
+      : ticks === 0 ? "يلا نبدأ أسبوعنا مع ربنا"
+      : ticks < 8 ? "كمّل، انت ماشي كويس"
+      : "قربت تخلّص الأسبوع";
+
+    var y = today.getFullYear(), cm = today.getMonth();
+    var done = !!months[curMonthKey];
+    var chips = "";
+    for (var m = 0; m < 12; m++) {
+      var mk = y + "-" + pad(m + 1);
+      chips += '<button class="chip" type="button" data-m="' + mk + '" aria-pressed="' + !!months[mk] + '"' + (m > cm ? " disabled" : "") + '>' + MONTHS[m] + '</button>';
+    }
+
+    var meetOn = !!(S.aw && S.aw.meetings && S.aw.meetings[wk]);
+    var first = (S.me.name || "").split(" ")[0] || "صديقي";
+    var notes = activeNotes(S.aw), notesHTML = "";
+    if (notes.length) {
+      notesHTML = '<section class="card" aria-labelledby="notes-title"><h2 id="notes-title">ملاحظات من المدرس</h2><ul class="notelist">' +
+        notes.map(function (x) {
+          var c = Number(x.n.stars) || 0;
+          return '<li><span class="nd">' + niceDate(x.n.date) + '</span><span class="nt">' + esc(x.n.text || "") + '</span>' +
+            '<span class="ns' + (c ? "" : " zero") + '">' + (c ? "−" + ar(c) + " ★" : "ملاحظة") + '</span></li>';
+        }).join("") + '</ul></section>';
+    }
+
+    return '<section class="card"><div class="hello"><h2>أهلاً يا ' + esc(first) + '</h2>' +
+      '<button class="link" type="button" data-editprofile="1">بياناتي</button></div>' +
+      '<div class="starline"><span class="gem" aria-hidden="true">★</span><span class="starnum">' + ar(st.total) + '</span><span>نجمة معاك</span></div>' +
+      '<p class="note">كل مرة تصلّي أو تقرأ الإنجيل أو تحضر القداس بتاخد نجمة. وبتاخد نجمة لما تحضر الاجتماع.</p></section>' +
+      '<section class="card" aria-labelledby="week-title"><h2 id="week-title">أسبوعي</h2>' +
+      '<div class="weekbar"><span class="range">' + rangeLabel(ds) + '</span>' + navButtons("kid", S.kidWeek, -26) + '</div>' +
+      '<div class="progress"><div class="progress-top"><span class="count">' + ar(ticks) + " من " + ar(MAX_TICKS) + '</span><span class="msg">' + msg + '</span></div>' +
+      '<div class="bar' + (ticks === MAX_TICKS ? " full" : "") + '" role="progressbar" aria-valuemin="0" aria-valuemax="' + MAX_TICKS + '" aria-valuenow="' + ticks + '" aria-label="تقدم الأسبوع"><span style="width:' + (ticks / MAX_TICKS * 100) + '%"></span></div></div>' +
+      '<p class="wkstars">نجوم الأسبوع ده: <b>★ ' + ar(st.weekTotal) + '</b> · ' + breakdown(st.week) + '</p>' +
+      '<ul class="days">' + rows + '</ul>' +
+      '<div class="weekly"><h3>الأسبوع كله</h3><div class="ticks">' +
+      '<button class="tick" type="button" data-mass="' + wk + '" aria-pressed="' + !!masses[wk] + '"><span class="box">' + CHECK + '</span>حضرت القداس<span class="gain" aria-hidden="true">★</span></button>' +
+      '<div class="tick status' + (meetOn ? " on" : "") + '"><span class="box">' + CHECK + '</span>حضرت الاجتماع<span class="gain" aria-hidden="true">★</span></div>' +
+      '</div><p class="note">القداس بتعلّمه إنت مرة في الأسبوع. الاجتماع المدرس هو اللي بيعلّمه.</p></div></section>' +
+      notesHTML +
+      '<section class="card" aria-labelledby="conf-title"><h2 id="conf-title">الاعتراف</h2>' +
+      '<p class="note">مرة واحدة في الشهر مع أبو اعترافك. لما تعترف علّم عليها.</p>' +
+      '<button class="tick big" type="button" data-m="' + curMonthKey + '" aria-pressed="' + done + '"><span class="box">' + CHECK + '</span>اعترفت في ' + MONTHS[cm] + " " + ar(y) + '</button>' +
+      '<div class="chips">' + chips + '</div></section>';
+  }
+
+  function loginHTML() {
+    var L = S.login, up = L.mode === "up";
+    return '<section class="card form" aria-labelledby="login-title"><h2 id="login-title">' + (up ? "إنشاء حساب" : "تسجيل الدخول") + '</h2>' +
+      '<p class="note">ادخل بحساب جوجل، أو بالإيميل والباسورد.</p>' +
+      '<button class="btn" type="button" data-google="1"' + (L.busy ? " disabled" : "") + '>الدخول بحساب جوجل</button>' +
+      '<p class="note" style="text-align:center">أو</p>' +
+      '<form id="loginForm" class="form" novalidate>' +
+      '<div class="field"><label for="lEmail">الإيميل</label><input type="email" id="lEmail" data-lf="email" value="' + esc(L.email) + '" autocomplete="email" maxlength="100"></div>' +
+      '<div class="field"><label for="lPass">الباسورد <span class="hint">(6 حروف على الأقل)</span></label><input type="password" id="lPass" data-lf="pass" value="' + esc(L.pass) + '" autocomplete="' + (up ? "new-password" : "current-password") + '" maxlength="100"></div>' +
+      (L.err ? '<p class="formerr" role="alert">' + esc(L.err) + '</p>' : "") +
+      '<div class="row"><button class="btn" type="submit"' + (L.busy ? " disabled" : "") + '>' + (up ? "إنشاء الحساب" : "دخول") + '</button>' +
+      '<button class="link" type="button" data-lmode="1">' + (up ? "عندي حساب" : "مفيش عندي حساب") + '</button>' +
+      (up ? "" : '<button class="link" type="button" data-forgot="1">نسيت الباسورد</button>') + '</div></form></section>';
+  }
+
+  function teachersHTML() {
+    var list = S.teachers.map(function (m) {
+      return '<li><span class="nt" style="direction:ltr;text-align:right">' + esc(m) + '</span><button class="mini" type="button" data-tdel="' + esc(m) + '">شيل</button></li>';
+    }).join("");
+    return '<div class="info" style="border-color:var(--line)"><h3>المتابعين معاك</h3>' +
+      '<p class="note">اكتب إيميل المتابع. هيدخل بنفس الإيميل (الأفضل بحساب جوجل)، ويشوف الأولاد وبياناتهم ويعلّم الاجتماع ويكتب ملاحظات ويخصم نجوم. حذف الأولاد ليك إنت بس.</p>' +
+      (list ? '<ul class="notelist">' + list + '</ul>' : '') +
+      '<form id="teacherForm" class="row" novalidate><input type="email" id="tEmail" maxlength="100" autocomplete="off" placeholder="email@example.com" style="flex:1 1 200px">' +
+      '<button class="btn" type="submit">ضيف</button></form>' +
+      (S.tErr ? '<p class="formerr" role="alert">' + esc(S.tErr) + '</p>' : "") + '</div>';
+  }
+
+  function renderKid() {
+    var el = $("kid"), html;
+    if (S.status === "loading") html = noticeHTML("بنفتح حسابك…");
+    else if (S.status === "setup") html = noticeHTML("الموقع لسه ما اتربطش بـ Firebase. افتح ملف index.html واملا بيانات المشروع في أوله.", true);
+    else if (S.status === "out") html = loginHTML();
+    else if (!S.meLoaded) html = noticeHTML("بنجيب بياناتك…");
+    else if (!S.me && (S.canWrite === false || S.writeFail))
+      html = noticeHTML("ما قدرناش نسجّل حسابك. اخرج وادخل تاني، ولو المشكلة فضلت قول للمدرس.", true);
+    else if (!S.me || !S.me.profileAt || S.editProfile) {
+      if (!S.draft) S.draft = makeDraft(S.me);
+      html = formHTML();
+    } else html = trackerHTML();
+    el.innerHTML = html;
+  }
+
+  /* ---------- teacher view ---------- */
+  function lastConfession(months) {
+    var ks = Object.keys(months || {}).filter(function (k) { return months[k]; }).sort();
+    if (!ks.length) return "";
+    var p = ks[ks.length - 1].split("-");
+    return MONTHS[Number(p[1]) - 1] + " " + ar(Number(p[0]));
+  }
+
+  function fact(label, val, cls, wide) {
+    var v = String(val == null ? "" : val).trim();
+    return '<div' + (wide ? ' class="wide"' : "") + '><dt>' + label + '</dt><dd' + (cls ? ' class="' + cls + '"' : "") + '>' + (v ? esc(v) : "—") + '</dd></div>';
+  }
+
+  function behaviorHTML(r) {
+    var aw = S.awards[r.id] || {};
+    var list = activeNotes(aw).map(function (x) {
+      var c = Number(x.n.stars) || 0, key = r.id + ":" + x.id, mine = x.n.by === S.uid;
+      var ctl = "";
+      if (S.isOwner || mine) {
+        ctl = S.confirmVoid === key
+          ? '<span class="last">تلغي الملاحظة دي؟</span><button class="mini" type="button" data-voidok="' + esc(key) + '">أيوه، الغيها</button> <button class="mini plain" type="button" data-voidno="1">لأ</button>'
+          : '<button class="mini" type="button" data-void="' + esc(key) + '">إلغاء</button>';
+      }
+      return '<li><span class="nd">' + niceDate(x.n.date) + (mine ? " · كتبتها إنت" : "") + '</span><span class="nt">' + esc(x.n.text || "") + '</span>' +
+        '<span class="ns' + (c ? "" : " zero") + '">' + (c ? "−" + ar(c) + " ★" : "ملاحظة") + '</span>' + ctl + '</li>';
+    }).join("");
+    return '<h3 class="grp" style="margin-top:0">السلوك والنجوم</h3>' +
+      '<p class="note">الولد بيشوف الملاحظات دي بس وما يقدرش يعدّلها. الخصم بيتشال من نجومه.</p>' +
+      (list ? '<ul class="notelist">' + list + '</ul>' : '<p class="note">مفيش ملاحظات لحد دلوقتي.</p>') +
+      '<form id="noteForm" class="noteform" novalidate>' +
+      '<div class="field"><label for="noteText">اكتب اللي حصل</label>' +
+      '<textarea id="noteText" data-nf="text" maxlength="300" placeholder="مثلاً: اتكلم وقت القداس">' + esc(S.nd.text) + '</textarea></div>' +
+      '<div class="field"><span class="lbl">عدد النجوم اللي هتتخصم <span class="hint">(صفر معناها ملاحظة بس)</span></span>' +
+      '<div class="stepper"><button class="nav" type="button" data-nstep="-1" aria-label="قلّل الخصم">−</button><output aria-live="polite">' + ar(S.nd.stars) + '</output>' +
+      '<button class="nav" type="button" data-nstep="1" aria-label="زوّد الخصم">+</button></div></div>' +
+      (S.noteErr ? '<p class="formerr" role="alert">' + esc(S.noteErr) + '</p>' : "") +
+      '<div class="row"><button class="btn" type="submit">سجّل الملاحظة</button></div></form>';
+  }
+
+  function infoHTML() {
+    var r = null;
+    S.recs.forEach(function (x) { if (x.id === S.sel) r = x; });
+    if (!r) return "";
+    var d = r.data, body;
+    if (!d.profileAt) {
+      body = '<p class="note">الولد ده لسه ما كمّلش بياناته.</p>';
+    } else {
+      var sibs = (d.siblings || []);
+      var sibHTML = d.hasSiblings
+        ? '<ul>' + sibs.map(function (s) { return '<li>' + esc(s.name || "") + ' · ' + ar(Number(s.age) || 0) + ' سنة · ' + esc(s.grade || "") + '</li>'; }).join("") + '</ul>'
+        : "مفيش إخوات";
+      body = '<dl class="facts">' +
+        fact("رقم الولد", d.phone, "ltr") + fact("رقم ماما", d.momPhone, "ltr") + fact("رقم بابا", d.dadPhone, "ltr") +
+        fact("أب الاعتراف", d.confessor) + fact("المدرسة", d.school) +
+        fact("العنوان", d.address, "", true) +
+        '<div class="wide"><dt>الإخوات</dt><dd>' + sibHTML + '</dd></div></dl>';
+    }
+    return '<section class="info" aria-label="بيانات ' + esc(d.name || "") + '"><div class="info-top"><h3>' + esc(d.name || "بدون اسم") + '</h3>' +
+      '<button class="link" type="button" data-info="' + esc(r.id) + '">إغلاق</button></div>' + body + behaviorHTML(r) + '</section>';
+  }
+
+  function renderTeacher() {
+    var el = $("teacher");
+    var ds = weekDays(S.teachWeek), wk = dkey(ds[0]);
+    var recs = S.recs.slice().sort(function (a, b) { return String(a.data.name || "").localeCompare(String(b.data.name || ""), "ar"); });
+    var active = 0, confessed = 0, metCount = 0;
+    recs.forEach(function (r) {
+      var aw = S.awards[r.id] || {};
+      if (weekTicks(r.data, ds) > 0) active++;
+      if ((r.data.months || {})[curMonthKey]) confessed++;
+      if (aw.meetings && aw.meetings[wk]) metCount++;
+    });
+
+    var head = "";
+    ds.forEach(function (d) {
+      var k = dkey(d);
+      head += '<th class="' + (k === todayKey ? "today" : "") + '">' + DAYS[d.getDay()] + '<small>' + ar(d.getDate()) + '</small></th>';
+    });
+
+    var body = "";
+    recs.forEach(function (r) {
+      var data = r.data, days = data.days || {}, cells = "", aw = S.awards[r.id] || {};
+      var st = calcStars(data, aw, ds);
+      ds.forEach(function (d) {
+        var k = dkey(d), x = days[k] || {}, future = k > todayKey;
+        cells += '<td class="' + (future ? "future" : "") + '">' +
+          '<span class="m' + (x.p ? " on" : "") + '" role="img" aria-label="' + (x.p ? "صلّى" : "ما صلّاش") + '">ص</span>' +
+          '<span class="m' + (x.b ? " on" : "") + '" role="img" aria-label="' + (x.b ? "قرأ الإنجيل" : "ما قراش الإنجيل") + '">إ</span></td>';
+      });
+      var joined = data.joinedAt ? new Date(data.joinedAt) : null;
+      var joinedTxt = joined && !isNaN(joined) ? "سجّل " + ar(joined.getDate()) + " " + MONTHS[joined.getMonth()] : "";
+      var del = "";
+      if (S.isOwner) {
+        del = S.confirmDel === r.id
+          ? '<span class="last">تحذف الحساب ده؟</span><button class="mini" type="button" data-delok="' + esc(r.id) + '">أيوه، احذف</button> <button class="mini plain" type="button" data-delno="1">لأ</button>'
+          : '<button class="mini" type="button" data-del="' + esc(r.id) + '">حذف</button>';
+      }
+      var conf = (data.months || {})[curMonthKey];
+      var last = lastConfession(data.months);
+      var massOn = !!(data.masses && data.masses[wk]);
+      var meetOn = !!(aw.meetings && aw.meetings[wk]);
+      var nm = esc(data.name || "بدون اسم");
+      body += '<tr><td class="name"><button class="namebtn" type="button" data-info="' + esc(r.id) + '" aria-expanded="' + (S.sel === r.id) + '">' + nm + '</button>' +
+        '<span class="joined">' + joinedTxt + '</span>' + del + '</td>' + cells +
+        '<td><span class="pill' + (massOn ? " on" : "") + '">' + (massOn ? "حضر" : "لسه") + '</span></td>' +
+        '<td><button class="pillbtn' + (meetOn ? " on" : "") + '" type="button" data-meet="' + esc(r.id) + ':' + wk + '" aria-pressed="' + meetOn + '" aria-label="حضور الاجتماع: ' + nm + '">' + (meetOn ? "حضر" : "علّم") + '</button></td>' +
+        '<td class="total"><span class="gem">★</span> ' + ar(st.weekTotal) + '</td>' +
+        '<td class="total"><span class="gem">★</span> ' + ar(st.total) + '</td>' +
+        '<td><span class="pill' + (conf ? " on" : "") + '">' + (conf ? "تم" : "لسه") + '</span>' + (last ? '<span class="last">آخر مرة: ' + last + '</span>' : "") + '</td></tr>';
+    });
+
+    var content;
+    if (!S.recsLoaded) content = noticeHTML("بنجيب البيانات…");
+    else if (!recs.length) content = '<div class="empty"><b>لسه محدش سجّل</b><span>ابعت الرابط للأولاد. كل واحد يدخل بحسابه ويملا بياناته ويدوس "سجّلني".</span>' +
+      '<span>الولد يدخل بحساب جوجل أو بإيميل وباسورد.</span></div>';
+    else content = '<div class="scroll"><table><thead><tr><th class="name">الاسم</th>' + head +
+      '<th>قداس</th><th>اجتماع</th><th>نجوم الأسبوع</th><th>كل النجوم</th><th>اعتراف ' + MONTHS[today.getMonth()] + '</th></tr></thead><tbody>' + body + '</tbody></table></div>' +
+      '<p class="legend">ص = صلّى · إ = قرأ الإنجيل · القداس بيعلّمه الولد · الاجتماع بتعلّمه إنت بزرار "علّم" · نجمة لكل صلاة وإنجيل وقداس واجتماع · دوس على اسم الولد تشوف بياناته وتكتب ملاحظة وتخصم نجوم</p>' + infoHTML();
+
+    el.innerHTML = '<section class="card"><h2>متابعة الأولاد</h2>' +
+      '<div class="stats"><span>مسجّلين <b>' + ar(recs.length) + '</b></span><span>عملوا حاجة الأسبوع ده <b>' + ar(active) + '</b></span><span>حضروا الاجتماع <b>' + ar(metCount) + '</b></span><span>اعترفوا الشهر ده <b>' + ar(confessed) + '</b></span></div>' +
+      (S.isOwner ? teachersHTML() : "") +
+      '<div class="weekbar"><span class="range">' + rangeLabel(ds) + '</span>' + navButtons("teach", S.teachWeek, -52) + '</div>' +
+      content + '</section>';
+  }
+
+  /* ---------- shell ---------- */
+  function attrSel(a) {
+    var s = a.tagName.toLowerCase();
+    for (var i = 0; i < a.attributes.length; i++) {
+      var n = a.attributes[i];
+      if (n.name.indexOf("data-") === 0) s += "[" + n.name + '="' + n.value + '"]';
+    }
+    return s;
+  }
+
+  function renderAll() {
+    var a = document.activeElement, focusSel = null, inputId = null, selStart = null, selEnd = null;
+    if (a && a.tagName === "BUTTON") focusSel = attrSel(a);
+    else if (a && a.id && (a.tagName === "INPUT" || a.tagName === "TEXTAREA")) {
+      inputId = a.id;
+      try { selStart = a.selectionStart; selEnd = a.selectionEnd; } catch (e) {}
+    }
+
+    $("outBtn").hidden = !S.user;
+    var tabs = $("tabs");
+    if (S.canEdit && S.isOwner) {
+      tabs.hidden = false;
+      tabs.innerHTML = '<button class="tab" type="button" data-tab="teacher" aria-pressed="' + (S.tab === "teacher") + '">المتابعة</button>' +
+        '<button class="tab" type="button" data-tab="kid" aria-pressed="' + (S.tab === "kid") + '">يومي</button>';
+    } else { tabs.hidden = true; tabs.innerHTML = ""; }
+
+    var notes = "";
+    if (S.net) notes += noticeHTML("مش قادر أوصل للبيانات دلوقتي. اللي قدامك ممكن يكون قديم.");
+    if (S.err) notes += noticeHTML(esc(S.err), true);
+    $("notes").innerHTML = notes;
+
+    var showTeacher = S.canEdit && (!S.isOwner || S.tab === "teacher");
+    $("kid").hidden = showTeacher;
+    $("teacher").hidden = !showTeacher;
+    if (showTeacher) renderTeacher(); else renderKid();
+
+    if (S.pop) { var p = document.querySelector(S.pop); if (p) p.classList.add("pop"); S.pop = null; }
+    if (focusSel) { var f = document.querySelector(focusSel); if (f) f.focus(); }
+    if (inputId) {
+      var inp = $(inputId);
+      if (inp) { inp.focus(); try { inp.setSelectionRange(selStart, selEnd); } catch (e) {} }
+    }
+  }
+
+  /* ---------- writes ---------- */
+  function handleErr(e) {
+    var c = e && e.code;
+    if (c === "permission-denied") { S.writeFail = true; S.err = "مش مسموح لك تعمل ده."; }
+    else if (c === "resource-exhausted") S.err = "الخدمة وصلت للحد المجاني النهارده. جرّب بكرة.";
+    else S.err = "ما اتحفظش. جرّب تاني.";
+    renderAll();
+  }
+  function enqueue(fn) {
+    S.chain = S.chain.then(fn).then(function () { if (S.err) { S.err = ""; renderAll(); } }, handleErr);
+  }
+  function myRef() { return doc(S.db, "records", S.uid); }
+  function mergeMine(patch) { return setDoc(myRef(), patch, { merge: true }); }
+
+  /* Teachers' data lives in awards/<kid id>: the kid can read it but never write it. */
+  function upsertAward(kidId, patch) { return setDoc(doc(S.db, "awards", kidId), patch, { merge: true }); }
+
+  document.addEventListener("input", function (e) {
+    var t = e.target;
+    if (!t.hasAttribute) return;
+    if (t.hasAttribute("data-nf")) { S.nd[t.getAttribute("data-nf")] = t.value; return; }
+    if (!S.draft) return;
+    if (t.hasAttribute("data-f")) S.draft[t.getAttribute("data-f")] = t.value;
+    else if (t.hasAttribute("data-s")) {
+      var p = t.getAttribute("data-s").split(":");
+      if (S.draft.sibs[Number(p[0])]) S.draft.sibs[Number(p[0])][p[1]] = t.value;
+    }
+  });
+
+  document.addEventListener("change", function (e) {
+    var t = e.target;
+    if (!S.draft || !t.hasAttribute || t.getAttribute("data-f") !== "hasSib") return;
+    S.draft.hasSib = t.value;
+    if (t.value === "yes" && !S.draft.sibs.length) S.draft.sibs.push(blankSib());
+    renderAll();
+  });
+
+  document.addEventListener("submit", function (e) {
+    var f = e.target;
+    if (f.id === "noteForm") {
+      e.preventDefault();
+      if (!S.db || !S.canEdit || !S.sel) return;
+      if (!S.awardsLoaded) { S.err = "استنى لحظة لحد ما البيانات تتحمّل."; renderAll(); return; }
+      var text = String(S.nd.text || "").replace(/[ \t]+/g, " ").trim();
+      if (text.length < 2) { S.noteErr = "اكتب اللي حصل."; renderAll(); return; }
+      var kid = S.sel, id = "n_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      var patch = { notes: {} };
+      patch.notes[id] = { text: text, stars: Math.max(0, Math.min(5, Math.round(Number(S.nd.stars) || 0))), date: todayKey, at: new Date().toISOString(), by: S.uid };
+      S.noteErr = ""; S.nd = { text: "", stars: 1 };
+      enqueue(function () { return upsertAward(kid, patch); });
+      renderAll();
+      return;
+    }
+    if (f.id !== "profileForm") return;
+    e.preventDefault();
+    if (!S.db || !S.uid || !S.draft) return;
+    var res = validateDraft(S.draft);
+    if (res.error) { S.formErr = res.error; renderAll(); return; }
+    S.formErr = "";
+    var isNew = !S.me, p = res.data;
+    enqueue(function () {
+      var w = setDoc(myRef(), isNew ? Object.assign({ joinedAt: new Date().toISOString(), days: {}, months: {} }, p) : p, { merge: true });
+      return w.then(function () { S.draft = null; S.editProfile = false; renderAll(); });
+    });
+  });
+
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("button");
+    if (!b || b.disabled) return;
+
+    if (b.id === "modeBtn") { setNight(!document.body.classList.contains("night")); return; }
+    if (b.hasAttribute("data-tab")) { S.tab = b.getAttribute("data-tab"); renderAll(); return; }
+    if (b.hasAttribute("data-nav")) {
+      var p = b.getAttribute("data-nav").split(":");
+      var key = p[0] === "kid" ? "kidWeek" : "teachWeek", lim = p[0] === "kid" ? -26 : -52;
+      S[key] = Math.min(0, Math.max(lim, S[key] + Number(p[1])));
+      renderAll(); return;
+    }
+    if (b.hasAttribute("data-info")) {
+      var iid = b.getAttribute("data-info");
+      S.sel = S.sel === iid ? null : iid;
+      S.nd = { text: "", stars: 1 }; S.noteErr = ""; S.confirmVoid = null;
+      renderAll(); return;
+    }
+    if (b.hasAttribute("data-nstep")) { S.nd.stars = Math.max(0, Math.min(5, (Number(S.nd.stars) || 0) + Number(b.getAttribute("data-nstep")))); renderAll(); return; }
+    if (b.hasAttribute("data-meet")) {
+      if (!S.canEdit || !S.db) return;
+      if (!S.awardsLoaded) { S.err = "استنى لحظة لحد ما البيانات تتحمّل."; renderAll(); return; }
+      var mp2 = b.getAttribute("data-meet").split(":"), mkid = mp2[0], mwk = mp2[1];
+      var mcur = !!(((S.awards[mkid] || {}).meetings || {})[mwk]);
+      var mpatch = { meetings: {} }; mpatch.meetings[mwk] = !mcur;
+      enqueue(function () { return upsertAward(mkid, mpatch); });
+      return;
+    }
+    if (b.hasAttribute("data-void")) { S.confirmVoid = b.getAttribute("data-void"); renderAll(); return; }
+    if (b.hasAttribute("data-voidno")) { S.confirmVoid = null; renderAll(); return; }
+    if (b.hasAttribute("data-voidok")) {
+      if (!S.canEdit || !S.db) return;
+      var vp = b.getAttribute("data-voidok").split(":"), vkid = vp[0], vid = vp[1];
+      var vpatch = { notes: {} }; vpatch.notes[vid] = { void: true };
+      S.confirmVoid = null;
+      enqueue(function () { return upsertAward(vkid, vpatch); });
+      renderAll(); return;
+    }
+    if (b.hasAttribute("data-editprofile")) { S.editProfile = true; S.draft = makeDraft(S.me); S.formErr = ""; renderAll(); var fn = $("f-name"); if (fn) fn.focus(); return; }
+    if (b.hasAttribute("data-cancelprofile")) { S.editProfile = false; S.draft = null; S.formErr = ""; renderAll(); return; }
+    if (b.hasAttribute("data-sibadd")) {
+      if (S.draft && S.draft.sibs.length < 8) { S.draft.sibs.push(blankSib()); renderAll(); var ni = $("sib-" + (S.draft.sibs.length - 1) + "-name"); if (ni) ni.focus(); }
+      return;
+    }
+    if (b.hasAttribute("data-sibdel")) {
+      var si = Number(b.getAttribute("data-sibdel"));
+      if (S.draft && si >= savedSibCount()) { S.draft.sibs.splice(si, 1); if (!S.draft.sibs.length) S.draft.sibs.push(blankSib()); renderAll(); }
+      return;
+    }
+    if (b.hasAttribute("data-del")) { S.confirmDel = b.getAttribute("data-del"); renderAll(); return; }
+    if (b.hasAttribute("data-delno")) { S.confirmDel = null; renderAll(); return; }
+    if (b.hasAttribute("data-delok")) {
+      var id = b.getAttribute("data-delok");
+      S.confirmDel = null;
+      if (S.sel === id) S.sel = null;
+      enqueue(function () { return deleteDoc(doc(S.db, "records", id)).then(function () { return deleteDoc(doc(S.db, "awards", id)); }); });
+      renderAll(); return;
+    }
+
+    if (!S.db || !S.uid || !S.me) return;
+    if (b.hasAttribute("data-k")) {
+      var k = b.getAttribute("data-k"), t = b.getAttribute("data-t");
+      var cur = !!(S.me.days && S.me.days[k] && S.me.days[k][t]);
+      var patch = { days: {} }; patch.days[k] = {}; patch.days[k][t] = !cur;
+      S.pop = attrSel(b);
+      enqueue(function () { return mergeMine(patch); });
+    } else if (b.hasAttribute("data-mass")) {
+      var wkey = b.getAttribute("data-mass");
+      var mpt = { masses: {} }; mpt.masses[wkey] = !(S.me.masses && S.me.masses[wkey]);
+      S.pop = attrSel(b);
+      enqueue(function () { return mergeMine(mpt); });
+    } else if (b.hasAttribute("data-m")) {
+      var mk = b.getAttribute("data-m");
+      var mp = { months: {} }; mp.months[mk] = !(S.me.months && S.me.months[mk]);
+      S.pop = attrSel(b);
+      enqueue(function () { return mergeMine(mp); });
+    }
+  });
+
+  /* ---------- start ---------- */
+  (function () {
+    var doy = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000);
+    var v = VERSES[doy % VERSES.length];
+    $("verse").innerHTML = "<b>" + v[0] + "</b>" + v[1];
+  })();
+  renderAll();
+
+  var MOON = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>';
+  var SUN = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+  function applyNight(on) {
+    document.body.classList.toggle("night", on);
+    var btn = $("modeBtn");
+    btn.innerHTML = on ? SUN : MOON;
+    btn.setAttribute("aria-pressed", String(on));
+    var label = on ? "الوضع النهاري" : "الوضع الليلي";
+    btn.setAttribute("aria-label", label);
+    btn.title = label;
+  }
+  function setNight(on) {
+    applyNight(on);
+    try { localStorage.setItem("yawmi-night", on ? "1" : "0"); } catch (e) {}
+  }
+  var nightPref = false;
+  try { nightPref = localStorage.getItem("yawmi-night") === "1"; } catch (e) {}
+  applyNight(nightPref);
+
+  var netTimer = null;
+  function serverReached() { clearTimeout(netTimer); if (S.net) { S.net = false; renderAll(); } }
+  function stopAll() { S.unsub.forEach(function (u) { try { u(); } catch (e) {} }); S.unsub = []; }
+  function listen(ref, next, errFn) { S.unsub.push(onSnapshot(ref, next, errFn)); }
+
+  function loginErr(e) {
+    var c = (e && e.code) || "", m;
+    if (c === "auth/popup-closed-by-user" || c === "auth/cancelled-popup-request") m = "";
+    else if (c === "auth/invalid-credential" || c === "auth/wrong-password" || c === "auth/user-not-found" || c === "auth/invalid-login-credentials") m = "الإيميل أو الباسورد غلط.";
+    else if (c === "auth/email-already-in-use") m = "الإيميل ده متسجّل قبل كده. ادخل بيه.";
+    else if (c === "auth/weak-password") m = "الباسورد ضعيف. اكتب 6 حروف على الأقل.";
+    else if (c === "auth/invalid-email") m = "الإيميل مش مظبوط.";
+    else if (c === "auth/too-many-requests") m = "محاولات كتير. استنى شوية وجرّب تاني.";
+    else if (c === "auth/network-request-failed") m = "مفيش نت. جرّب تاني.";
+    else if (c === "auth/popup-blocked") m = "المتصفح منع نافذة جوجل. اسمح بالنوافذ أو ادخل بالإيميل.";
+    else m = "ما قدرناش ندخلك. جرّب تاني.";
+    S.login.err = m; S.login.busy = false; renderAll();
+  }
+
+  document.addEventListener("input", function (e) {
+    var t = e.target;
+    if (t && t.hasAttribute && t.hasAttribute("data-lf")) S.login[t.getAttribute("data-lf")] = t.value;
+  });
+
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("button");
+    if (!b || b.disabled || !auth) return;
+    if (b.hasAttribute("data-lmode")) { S.login.mode = S.login.mode === "in" ? "up" : "in"; S.login.err = ""; renderAll(); return; }
+    if (b.hasAttribute("data-google")) { S.login.err = ""; signInWithPopup(auth, new GoogleAuthProvider()).catch(loginErr); return; }
+    if (b.hasAttribute("data-forgot")) {
+      var em = cleanName(S.login.email).toLowerCase();
+      if (!em) { S.login.err = "اكتب الإيميل الأول وبعدين دوس \"نسيت الباسورد\"."; renderAll(); return; }
+      sendPasswordResetEmail(auth, em).then(function () { S.login.err = "بعتنالك رسالة على الإيميل تغيّر منها الباسورد."; renderAll(); }).catch(loginErr);
+      return;
+    }
+    if (b.id === "outBtn") { signOut(auth); return; }
+    if (b.hasAttribute("data-tdel") && S.isOwner && S.db) {
+      var tm = b.getAttribute("data-tdel");
+      enqueue(function () { return deleteDoc(doc(S.db, "teachers", tm)); });
+    }
+  });
+
+  document.addEventListener("submit", function (e) {
+    var f = e.target;
+    if (f.id === "loginForm") {
+      e.preventDefault();
+      var em = cleanName(S.login.email).toLowerCase(), pw = S.login.pass || "";
+      if (!em || pw.length < 6) { S.login.err = "اكتب الإيميل وباسورد 6 حروف على الأقل."; renderAll(); return; }
+      S.login.busy = true; S.login.err = ""; renderAll();
+      var pr = S.login.mode === "up"
+        ? createUserWithEmailAndPassword(auth, em, pw).then(function (c) { return sendEmailVerification(c.user).catch(function () {}); })
+        : signInWithEmailAndPassword(auth, em, pw);
+      pr.then(function () { S.login.busy = false; S.login.pass = ""; }).catch(loginErr);
+    } else if (f.id === "teacherForm") {
+      e.preventDefault();
+      if (!S.isOwner || !S.db) return;
+      var tm = String(($("tEmail") || {}).value || "").trim().toLowerCase();
+      if (!/^[^\s@\/]+@[^\s@\/]+\.[^\s@\/]+$/.test(tm)) { S.tErr = "اكتب إيميل مظبوط."; renderAll(); return; }
+      S.tErr = "";
+      enqueue(function () { return setDoc(doc(S.db, "teachers", tm), { addedAt: new Date().toISOString() }); });
+      renderAll();
+    }
+  });
+
+  var auth = null, fdb = null;
+  var configured = firebaseConfig && String(firebaseConfig.apiKey || "").indexOf("PUT_") !== 0;
+  if (configured) {
+    try { var fapp = initializeApp(firebaseConfig); auth = getAuth(fapp); fdb = getFirestore(fapp); } catch (e) { configured = false; }
+  }
+  if (!configured) { S.status = "setup"; renderAll(); }
+  else onAuthStateChanged(auth, async function (user) {
+    stopAll(); clearTimeout(netTimer);
+    S.me = null; S.meLoaded = false; S.aw = null; S.recs = []; S.recsLoaded = false; S.awards = {}; S.awardsLoaded = false;
+    S.teachers = []; S.canEdit = false; S.isOwner = false; S.sel = null; S.draft = null; S.editProfile = false; S.tab = "kid"; S.err = "";
+    if (!user) { S.user = null; S.uid = null; S.db = null; S.status = "out"; renderAll(); return; }
+
+    S.user = user; S.uid = user.uid; S.db = fdb; S.status = "ok";
+    var mail = String(user.email || "").toLowerCase(), verified = !!user.emailVerified;
+    S.isOwner = verified && mail === String(OWNER_EMAIL || "").toLowerCase();
+    var isTeacher = false;
+    if (!S.isOwner && verified && mail) {
+      try { isTeacher = (await getDoc(doc(fdb, "teachers", mail))).exists(); } catch (e) {}
+    }
+    if (auth.currentUser !== user) return;
+    S.canEdit = S.isOwner || isTeacher;
+    if (S.canEdit) S.tab = "teacher";
+    if (!verified && mail === String(OWNER_EMAIL || "").toLowerCase()) S.err = "أكّد الإيميل من الرسالة اللي وصلتلك، أو ادخل بحساب جوجل، عشان تفتح صفحة المتابعة.";
+
+    netTimer = setTimeout(function () { S.net = true; renderAll(); }, 10000);
+
+    listen(myRef(), function (snap) {
+      S.meLoaded = true;
+      S.me = snap.exists() ? snap.data() : null;
+      if (!snap.metadata.fromCache) serverReached();
+      renderAll();
+    }, function () {
+      S.meLoaded = true; S.err = "مش قادر أفتح بياناتك دلوقتي."; clearTimeout(netTimer); renderAll();
+    });
+    listen(doc(fdb, "awards", S.uid), function (snap) {
+      S.aw = snap.exists() ? snap.data() : null;
+      renderAll();
+    }, function () {});
+
+    if (S.canEdit) {
+      listen(collection(fdb, "records"), function (snap) {
+        S.recsLoaded = true;
+        S.recs = snap.docs.map(function (d) { return { id: d.id, data: d.data() || {} }; });
+        if (!snap.metadata.fromCache) serverReached();
+        renderAll();
+      }, function () {
+        S.recsLoaded = true; S.err = "مش قادر أفتح متابعة الأولاد دلوقتي."; clearTimeout(netTimer); renderAll();
+      });
+      listen(collection(fdb, "awards"), function (snap) {
+        var m = {};
+        snap.docs.forEach(function (d) { m[d.id] = d.data() || {}; });
+        S.awards = m; S.awardsLoaded = true;
+        renderAll();
+      }, function () {
+        S.awardsLoaded = false; S.err = "مش قادر أفتح النجوم والملاحظات دلوقتي."; renderAll();
+      });
+    }
+    if (S.isOwner) {
+      listen(collection(fdb, "teachers"), function (snap) {
+        S.teachers = snap.docs.map(function (d) { return d.id; }).sort();
+        renderAll();
+      }, function () {});
+    }
+    renderAll();
+  });
+</script>
+</body>
+</html>
